@@ -1,0 +1,75 @@
+/* --- Global Styles & Variables --- */
+:root {
+  --primary-color: #4f46e5;
+  --primary-hover: #4338ca;
+  --green-color: #16a34a;
+  --red-color: #dc2626;
+  --background-color: #f1f5f9;
+  --card-background: #ffffff;
+  --text-dark: #1e293b;
+  --text-light: #64748b;
+  --border-color: #e2e8f0;
+  --font-family: 'Inter', sans-serif;
+  --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --border-radius: 0.75rem;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-family);
+  background-color: var(--background-color);
+  color: var(--text-dark);
+}
+
+/* --- Layout --- */
+.container {
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.header h1 {
+  font-size: 2.25rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.header p {
+  color: var(--text-light);
+  margin-top: 0.5rem;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+@media (min-width: 1024px) {
+  .dashboard-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .grid-col-span-1 {
+    grid-column: span 1 / span 1;
+  }
+
+  .grid-col-span-2 {
+    grid-column: span 2 / span 2;
+  }
+}
+
+/* --- Card & General Elements --- */
+.card {
+  background-color: var(--card-background);
+  padding: 1.5rem;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+}
+
+.card-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 1rem 0;
+}
