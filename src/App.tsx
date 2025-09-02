@@ -241,7 +241,7 @@ function App() {
             </div>
             <Summary expenses={filteredExpenses} incomes={filteredIncomes} />
           </div>
-          {userId && <TransactionForm userId={userId} />}
+          {userId && <TransactionForm userId={userId} currentBalance={currentBalance} />}
         </div>
 
         <div className="grid-col-span-2 card">

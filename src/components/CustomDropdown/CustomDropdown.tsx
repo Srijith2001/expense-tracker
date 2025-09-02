@@ -21,7 +21,6 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
     onChange,
     placeholder = "Select an option",
     className = "",
-    required = false
 }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [selectedLabel, setSelectedLabel] = useState("");
