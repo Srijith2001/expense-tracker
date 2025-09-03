@@ -4,6 +4,7 @@ export interface BaseTransaction {
     description: string;
     amount: number;
     runningBalance: number;
+    note: string;
     date: string; // ISO string YYYY-MM-DD
 }
 

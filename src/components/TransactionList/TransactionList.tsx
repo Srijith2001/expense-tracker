@@ -36,6 +36,7 @@ const TransactionList: React.FC<TransactionListProps> = ({ transactions, userId 
                         <th>Date</th>
                         <th className="text-right">Amount</th>
                         <th className="text-right">Running Balance</th>
+                        <th className="text-center">Note</th>
                         <th className="text-center">Actions</th>
                     </tr>
                 </thead>
@@ -69,6 +70,9 @@ const TransactionList: React.FC<TransactionListProps> = ({ transactions, userId 
                                     </td>
                                     <td className="text-right">
                                         ₹{t.runningBalance.toFixed(2)}
+                                    </td>
+                                    <td className="text-left">
+                                        {t.note}
                                     </td>
                                     <td className="text-center">
                                         <button

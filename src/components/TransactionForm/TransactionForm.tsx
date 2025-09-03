@@ -14,6 +14,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ userId, currentBalanc
     const [description, setDescription] = useState<string>('');
     const [amount, setAmount] = useState<string>('');
     const [date, setDate] = useState<string>(new Date().toISOString().slice(0, 10));
+    const [note, setNote] = useState<string>('');
     const [category, setCategory] = useState<string>('Food');
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
@@ -38,15 +39,33 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ userId, currentBalanc
         try {
             if (isExpense) {
                 const expensesCol = collection(db, 'artifacts', appId, 'users', userId, 'expenses');
-                await addDoc(expensesCol, { description, category, amount: parseFloat(amount), runningBalance: currentBalance - parseInt(amount), date, createdAt: serverTimestamp() });
+                await addDoc(expensesCol,
+                    {
+                        description,
+                        category,
+                        amount: parseFloat(amount),
+                        runningBalance: currentBalance - parseInt(amount),
+                        note,
+                        date,
+                        createdAt: serverTimestamp()
+                    });
             } else {
                 const incomesCol = collection(db, 'artifacts', appId, 'users', userId, 'incomes');
-                await addDoc(incomesCol, { description, amount: parseFloat(amount), runningBalance: currentBalance + parseInt(amount), date, createdAt: serverTimestamp() });
+                await addDoc(incomesCol,
+                    {
+                        description,
+                        amount: parseFloat(amount),
+                        runningBalance: currentBalance + parseInt(amount),
+                        note,
+                        date,
+                        createdAt: serverTimestamp()
+                    });
             }
             setDescription('');
             setAmount('');
             setDate(new Date().toISOString().slice(0, 10));
             setCategory('Food');
+            setNote('')
         } catch (error) {
             console.error("Error adding document: ", error);
         } finally {
@@ -85,6 +104,10 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ userId, currentBalanc
                 <div className="form-group">
                     <label htmlFor="date">Date</label>
                     <input type="date" id="date" value={date} onChange={(e) => setDate(e.target.value)} className="input" required />
+                </div>
+                <div className="form-group">
+                    <label htmlFor="date">Note</label>
+                    <input type="text" id="note" value={note} onChange={(e) => setNote(e.target.value)} className="input" />
                 </div>
                 <button type="submit" disabled={isSubmitting} className={`button ${isExpense ? 'button-expense' : 'button-income'}`}>
                     {isSubmitting ? 'Adding...' : `Add ${isExpense ? 'Expense' : 'Income'}`}
