@@ -1,6 +1,7 @@
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import React, { useState } from 'react';
 import { appId, db } from '../../config/firebase';
+import CustomDateSelector from '../CustomDateSelector/CustomDateSelector';
 import './BalanceDisplay.css';
 
 interface BalanceDisplayProps {
@@ -12,6 +13,7 @@ interface BalanceDisplayProps {
 const BalanceDisplay: React.FC<BalanceDisplayProps> = ({ userId, currentBalance, onBalanceUpdate }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [editValue, setEditValue] = useState(currentBalance.toString());
+    const [editDate, setEditDate] = useState(new Date().toISOString().slice(0, 16));
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const formatCurrency = (amount: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(amount);
@@ -19,11 +21,13 @@ const BalanceDisplay: React.FC<BalanceDisplayProps> = ({ userId, currentBalance,
     const handleEdit = () => {
         setIsEditing(true);
         setEditValue(currentBalance.toString());
+        setEditDate(new Date().toISOString().slice(0, 16));
     };
 
     const handleCancel = () => {
         setIsEditing(false);
         setEditValue(currentBalance.toString());
+        setEditDate(new Date().toISOString().slice(0, 16));
     };
 
     const handleSave = async () => {
@@ -52,8 +56,8 @@ const BalanceDisplay: React.FC<BalanceDisplayProps> = ({ userId, currentBalance,
             await addDoc(balancesCol, {
                 description,
                 amount: Math.abs(balanceDifference),
-                date: new Date().toISOString().slice(0, 10),
-                runningBalance: parseFloat(balanceDifference.toFixed(2)),
+                date: editDate,
+                runningBalance: newBalance,
                 type: 'balance',
                 createdAt: serverTimestamp()
             });
@@ -106,6 +110,17 @@ const BalanceDisplay: React.FC<BalanceDisplayProps> = ({ userId, currentBalance,
                             placeholder="Enter balance"
                             autoFocus
                             step="0.01"
+                        />
+                    </div>
+                    <div className="balance-date-group">
+                        <label className="balance-date-label">Date:</label>
+                        <CustomDateSelector
+                            value={editDate}
+                            onChange={setEditDate}
+                            placeholder="Select date and time"
+                            max={new Date().toISOString().slice(0, 16)}
+                            includeTime={true}
+                            className="balance-date-selector"
                         />
                     </div>
                     <div className="balance-actions">

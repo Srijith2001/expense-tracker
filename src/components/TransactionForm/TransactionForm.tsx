@@ -1,6 +1,7 @@
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import React, { useState } from "react";
 import { appId, db } from "../../config/firebase";
+import CustomDateSelector from "../CustomDateSelector/CustomDateSelector";
 import CustomDropdown from "../CustomDropdown/CustomDropdown";
 import './TransactionForm.css';
 
@@ -13,7 +14,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ userId, currentBalanc
     const [isExpense, setIsExpense] = useState<boolean>(true);
     const [description, setDescription] = useState<string>('');
     const [amount, setAmount] = useState<string>('');
-    const [date, setDate] = useState<string>(new Date().toISOString().slice(0, 10));
+    const [date, setDate] = useState<string>(new Date().toISOString().slice(0, 16));
     const [note, setNote] = useState<string>('');
     const [category, setCategory] = useState<string>('Food');
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -63,7 +64,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ userId, currentBalanc
             }
             setDescription('');
             setAmount('');
-            setDate(new Date().toISOString().slice(0, 10));
+            setDate(new Date().toISOString().slice(0, 16));
             setCategory('Food');
             setNote('')
         } catch (error) {
@@ -103,7 +104,14 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ userId, currentBalanc
                 </div>
                 <div className="form-group">
                     <label htmlFor="date">Date</label>
-                    <input type="date" id="date" value={date} onChange={(e) => setDate(e.target.value)} className="input" required />
+                    <CustomDateSelector
+                        value={date}
+                        onChange={setDate}
+                        placeholder="Select date and time"
+                        max={new Date().toISOString().slice(0, 16)}
+                        includeTime={true}
+                        className="transaction-date-selector"
+                    />
                 </div>
                 <div className="form-group">
                     <label htmlFor="date">Note</label>

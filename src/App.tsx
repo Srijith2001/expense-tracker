@@ -99,7 +99,12 @@ function App() {
     const filteredBalances = allBalances.filter(b => b.date.startsWith(monthFilter));
 
     const transactions: AnyTransaction[] = [...filteredExpenses, ...filteredIncomes, ...filteredBalances]
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      .sort((a, b) => {
+        // Sort by date and time (most recent first)
+        const dateA = new Date(a.date).getTime();
+        const dateB = new Date(b.date).getTime();
+        return dateB - dateA;
+      });
 
     // Calculate current balance: sum of all incomes + balance adjustments - sum of all expenses
     const totalIncome = allIncomes.reduce((sum, income) => sum + income.amount, 0);

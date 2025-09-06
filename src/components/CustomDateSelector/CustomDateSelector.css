@@ -1,0 +1,805 @@
+.custom-date-selector {
+    position: relative;
+    width: 100%;
+}
+
+.date-trigger {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background-color: #f8fafc;
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    box-sizing: border-box;
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    min-height: 1.5rem;
+}
+
+.date-trigger:hover {
+    border-color: var(--primary-color);
+    background-color: #ffffff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.date-trigger:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px #c7d2fe;
+}
+
+.date-trigger.open {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px #c7d2fe;
+}
+
+.date-value {
+    color: var(--text-dark);
+    font-size: 0.8rem;
+}
+
+.date-arrow {
+    color: #666;
+    transition: transform 0.2s ease-in-out;
+    flex-shrink: 0;
+}
+
+.date-arrow.rotated {
+    transform: rotate(180deg);
+}
+
+.date-options {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background-color: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    margin-top: 0.25rem;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    min-width: 280px;
+    max-width: 320px;
+    width: max-content;
+}
+
+/* View Toggle */
+.date-view-toggle {
+    display: flex;
+    border-bottom: 1px solid #f1f5f9;
+    padding: 0.5rem;
+    gap: 0.25rem;
+}
+
+.view-toggle-button {
+    flex: 1;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--border-color);
+    background-color: #ffffff;
+    color: var(--text-dark);
+    font-size: 0.75rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    border-radius: 0.375rem;
+}
+
+.view-toggle-button:first-child {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    border-right: none;
+}
+
+.view-toggle-button:last-child {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.view-toggle-button:hover {
+    background-color: #f8fafc;
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.view-toggle-button.active {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.view-toggle-button.active:hover {
+    background-color: var(--primary-hover);
+    border-color: var(--primary-hover);
+}
+
+.date-picker {
+    padding: 1rem;
+    display: flex;
+    gap: 0.75rem;
+    align-items: end;
+}
+
+.date-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    flex: 1;
+}
+
+.date-section label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--text-dark);
+    margin: 0;
+}
+
+.date-select {
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 0.375rem;
+    background-color: #ffffff;
+    font-size: 0.875rem;
+    color: var(--text-dark);
+    cursor: pointer;
+    transition: border-color 0.2s ease-in-out;
+}
+
+.date-select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.1);
+}
+
+.date-select:hover {
+    border-color: var(--primary-color);
+}
+
+.date-actions {
+    padding: 0.75rem 1rem;
+    border-top: 1px solid #f1f5f9;
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+}
+
+.date-action-button {
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    background-color: #ffffff;
+    color: var(--text-dark);
+}
+
+.today-button:hover {
+    background-color: #f8fafc;
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.apply-button {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.apply-button:hover {
+    background-color: var(--primary-hover);
+    border-color: var(--primary-hover);
+}
+
+/* Calendar View Styles */
+.calendar-view {
+    padding: 1rem;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.calendar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+
+.calendar-nav-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border: 1px solid var(--border-color);
+    background-color: #ffffff;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    color: var(--text-dark);
+}
+
+.calendar-nav-button:hover {
+    background-color: #f8fafc;
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.calendar-month-year {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-dark);
+    margin: 0;
+    text-align: center;
+    flex: 1;
+}
+
+.calendar-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.25rem;
+    margin-bottom: 0.5rem;
+}
+
+.calendar-weekday {
+    text-align: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-light);
+    padding: 0.5rem 0;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.125rem;
+    margin-bottom: 1rem;
+    width: 100%;
+}
+
+.calendar-day {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    aspect-ratio: 1;
+    min-width: 0;
+    border: 1px solid transparent;
+    background-color: transparent;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-dark);
+    position: relative;
+}
+
+.calendar-day:hover:not(:disabled) {
+    background-color: #f8fafc;
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.calendar-day.selected {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+    font-weight: 600;
+}
+
+.calendar-day.today {
+    background-color: #e0e7ff;
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.calendar-day.today:hover:not(:disabled) {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.calendar-day.other-month {
+    color: var(--text-light);
+    opacity: 0.5;
+}
+
+.calendar-day.disabled {
+    color: #cbd5e1;
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.calendar-day.disabled:hover {
+    background-color: transparent;
+    border-color: transparent;
+    color: #cbd5e1;
+}
+
+.calendar-actions {
+    display: flex;
+    justify-content: center;
+    padding-top: 0.75rem;
+    border-top: 1px solid #f1f5f9;
+}
+
+/* Time Picker Styles */
+.time-picker {
+    padding: 0.75rem 1rem;
+    border-top: 1px solid #f1f5f9;
+    display: flex;
+    gap: 0.75rem;
+    align-items: end;
+}
+
+.calendar-time-picker {
+    padding: 0.75rem 1rem;
+    border-top: 1px solid #f1f5f9;
+    display: flex;
+    gap: 0.75rem;
+    align-items: end;
+    justify-content: center;
+}
+
+.time-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    flex: 1;
+}
+
+.time-section label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--text-dark);
+    margin: 0;
+}
+
+.time-select {
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 0.375rem;
+    background-color: #ffffff;
+    font-size: 0.875rem;
+    color: var(--text-dark);
+    cursor: pointer;
+    transition: border-color 0.2s ease-in-out;
+    min-width: 0;
+}
+
+.time-select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.1);
+}
+
+/* Period selector styles */
+.period-section {
+    min-width: 80px;
+}
+
+.period-selector {
+    display: flex;
+    gap: 0.25rem;
+    border-radius: 0.375rem;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+}
+
+.period-button {
+    flex: 1;
+    padding: 0.5rem 0.25rem;
+    border: none;
+    background-color: #ffffff;
+    color: var(--text-dark);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    text-align: center;
+}
+
+.period-button:hover {
+    background-color: var(--background-hover);
+}
+
+.period-button.active {
+    background-color: var(--primary-color);
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.period-button:first-child {
+    border-right: 1px solid var(--border-color);
+}
+
+/* Highlight animation */
+@keyframes highlight-pulse {
+
+    0%,
+    100% {
+        box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.4);
+    }
+
+    50% {
+        box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+    }
+}
+
+.time-select:hover {
+    border-color: var(--primary-color);
+}
+
+/* Clock View Styles */
+.clock-view {
+    padding: 1rem;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.clock-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.clock-back-button {
+    background: none;
+    border: none;
+    color: var(--text-dark);
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 0.375rem;
+    transition: all 0.2s ease-in-out;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.clock-back-button:hover {
+    background-color: var(--background-hover);
+    color: var(--primary-color);
+}
+
+.clock-date-button {
+    background: none;
+    border: none;
+    color: var(--text-dark);
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.375rem;
+    transition: all 0.2s ease-in-out;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.clock-date-button:hover {
+    background-color: var(--background-hover);
+    color: var(--primary-color);
+}
+
+.clock-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.clock-face {
+    position: relative;
+    width: 160px;
+    height: 160px;
+    border: 3px solid var(--primary-color);
+    border-radius: 50%;
+    background-color: #ffffff;
+    margin-bottom: 1rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+.clock-face::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100px;
+    height: 100px;
+    border: 1px dashed rgba(79, 70, 229, 0.3);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 1;
+}
+
+.clock-face:hover {
+    border-color: var(--primary-hover);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    transform: scale(1.02);
+}
+
+.clock-face:active {
+    transform: scale(0.98);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Clock zones for visual feedback */
+.clock-zone {
+    position: absolute;
+    border-radius: 50%;
+    transition: all 0.2s ease-in-out;
+    pointer-events: none;
+}
+
+.clock-hour-zone {
+    width: 100px;
+    height: 100px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: transparent;
+    border: 2px solid transparent;
+}
+
+.clock-hour-zone.hovered {
+    background-color: rgba(79, 70, 229, 0.1);
+    border-color: var(--primary-color);
+}
+
+.clock-minute-zone {
+    width: 140px;
+    height: 140px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: transparent;
+    border: 2px solid transparent;
+    border-radius: 50%;
+}
+
+.clock-minute-zone.hovered {
+    background-color: rgba(239, 68, 68, 0.1);
+    border-color: #ef4444;
+}
+
+
+.clock-hour-marker {
+    position: absolute;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-dark);
+    z-index: 2;
+}
+
+.clock-minute-marker {
+    position: absolute;
+    width: 2px;
+    height: 6px;
+    background-color: #cbd5e1;
+    border-radius: 1px;
+}
+
+.clock-hand {
+    position: absolute;
+    background-color: var(--primary-color);
+    border-radius: 2px;
+    transform-origin: bottom center;
+    z-index: 3;
+}
+
+.clock-hour-hand {
+    width: 4px;
+    height: 40px;
+    top: 40px;
+    left: calc(50% - 2px);
+}
+
+.clock-minute-hand {
+    width: 3px;
+    height: 50px;
+    top: 30px;
+    left: calc(50% - 1.5px);
+    background-color: #ef4444;
+}
+
+.clock-center {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background-color: var(--primary-color);
+    border-radius: 50%;
+    top: calc(50% - 4px);
+    left: calc(50% - 4px);
+    z-index: 4;
+}
+
+.clock-time-display {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: var(--text-dark);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+
+.time-part {
+    transition: all 0.3s ease-in-out;
+    display: inline-block;
+    font-weight: 600;
+}
+
+.time-part.highlighted {
+    animation: highlight-blink 0.8s ease-in-out infinite, highlight-zoom 0.8s ease-in-out infinite;
+}
+
+.time-separator {
+    font-weight: 600;
+    color: var(--text-dark);
+    font-size: 1.30rem;
+}
+
+.hour-part {
+    font-size: 1.30rem;
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+.hour-part.highlighted {
+    color: #4f46e5;
+    font-weight: 700;
+}
+
+.minute-part {
+    font-size: 1.30rem;
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+.minute-part.highlighted {
+    color: #ef4444;
+    font-weight: 700;
+}
+
+.period-toggle {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.25rem;
+    font-weight: 500;
+    color: var(--primary-color);
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.375rem;
+    transition: all 0.2s ease-in-out;
+    font-family: inherit;
+}
+
+.period-toggle:hover {
+    background-color: var(--background-hover);
+    color: var(--primary-hover);
+}
+
+.period-toggle:active {
+    transform: scale(0.95);
+}
+
+/* Highlight animations */
+@keyframes highlight-blink {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.3;
+    }
+}
+
+@keyframes highlight-zoom {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.15);
+    }
+}
+
+.clock-time-picker {
+    padding: 0.75rem 1rem;
+    border-top: 1px solid #f1f5f9;
+    display: flex;
+    gap: 0.5rem;
+    align-items: end;
+    justify-content: center;
+}
+
+.clock-actions {
+    display: flex;
+    justify-content: center;
+    padding-top: 0.75rem;
+    border-top: 1px solid #f1f5f9;
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+    .date-picker {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .date-section {
+        flex-direction: row;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .date-section label {
+        min-width: 60px;
+    }
+
+    .date-options {
+        min-width: 240px;
+        max-width: 280px;
+    }
+
+    .calendar-day {
+        font-size: 0.75rem;
+    }
+
+    .calendar-grid {
+        gap: 0.0625rem;
+    }
+
+    .calendar-view {
+        padding: 0.75rem;
+    }
+
+    .clock-view {
+        padding: 0.75rem;
+    }
+
+    .clock-face {
+        width: 140px;
+        height: 140px;
+    }
+
+    .clock-hour-hand {
+        height: 35px;
+        top: 35px;
+    }
+
+    .clock-minute-hand {
+        height: 45px;
+        top: 25px;
+    }
+
+    .clock-time-display {
+        font-size: 1.25rem;
+    }
+
+    .clock-time-picker {
+        gap: 0.25rem;
+    }
+
+    .time-section {
+        min-width: 0;
+    }
+
+}
