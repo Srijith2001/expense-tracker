@@ -27,6 +27,9 @@ const CustomDateSelector: React.FC<CustomDateSelectorProps> = ({
         month: new Date().getMonth(),
         day: new Date().getDate()
     });
+
+    // Ensure month is always within bounds
+    const safeMonth = Math.max(0, Math.min(11, selectedDate.month || 0));
     const [selectedTime, setSelectedTime] = useState({
         hour: new Date().getHours(),
         minute: new Date().getMinutes(),
@@ -215,7 +218,12 @@ const CustomDateSelector: React.FC<CustomDateSelectorProps> = ({
         onChange(dateStr);
     };
 
-    const handleTimeChange = (type: 'hour' | 'minute' | 'period', newValue: number | 'AM' | 'PM') => {
+    const handleTimeChange = (type: 'hour' | 'minute' | 'period', newValue: number | 'AM' | 'PM', event?: React.MouseEvent) => {
+        if (event) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+
         let newTime = { ...selectedTime };
 
         if (type === 'period') {
@@ -275,17 +283,25 @@ const CustomDateSelector: React.FC<CustomDateSelectorProps> = ({
         const distance = Math.sqrt(clickX * clickX + clickY * clickY);
         const isHourArea = distance < 50; // Within inner circle for hours
 
+        let newTime = { ...selectedTime };
+
         if (isHourArea) {
             // Hour selection (12-hour format)
             const hour12 = Math.round(angle / 30);
             const adjustedHour = hour12 === 0 ? 12 : hour12;
             const hour24 = convertTo24Hour(adjustedHour, selectedTime.period as 'AM' | 'PM');
-            setSelectedTime({ ...selectedTime, hour: hour24 });
+            newTime.hour = hour24;
         } else {
             // Minute selection
             const minute = Math.round(angle / 6);
-            setSelectedTime({ ...selectedTime, minute });
+            newTime.minute = minute;
         }
+
+        setSelectedTime(newTime);
+
+        // Update the value immediately
+        const dateStr = `${selectedDate.year}-${String(selectedDate.month + 1).padStart(2, '0')}-${String(selectedDate.day).padStart(2, '0')}T${String(newTime.hour).padStart(2, '0')}:${String(newTime.minute).padStart(2, '0')}`;
+        onChange(dateStr);
     };
 
     const handleApply = () => {
@@ -517,7 +533,7 @@ const CustomDateSelector: React.FC<CustomDateSelectorProps> = ({
                                     </svg>
                                 </button>
                                 <h3 className="calendar-month-year">
-                                    {months[selectedDate.month].label} {selectedDate.year}
+                                    {months[safeMonth]?.label || 'January'} {selectedDate.year}
                                 </h3>
                                 <button
                                     type="button"
@@ -607,7 +623,7 @@ const CustomDateSelector: React.FC<CustomDateSelectorProps> = ({
                                     onClick={handleClockBackToCalendar}
                                     className="clock-date-button"
                                 >
-                                    {String(selectedDate.day).padStart(2, '0')}-{months[selectedDate.month].label.slice(0, 3)}-{selectedDate.year}
+                                    {String(selectedDate.day).padStart(2, '0')}-{months[safeMonth]?.label?.slice(0, 3) || 'Jan'}-{selectedDate.year}
                                 </button>
                             </div>
 
@@ -625,7 +641,7 @@ const CustomDateSelector: React.FC<CustomDateSelectorProps> = ({
 
                                     {/* Hour markers */}
                                     {Array.from({ length: 12 }, (_, i) => {
-                                        const angle = (i * 30) - 90;
+                                        const angle = i * 30;
                                         const pos = getClockPosition(angle, 60);
                                         return (
                                             <div
@@ -645,7 +661,7 @@ const CustomDateSelector: React.FC<CustomDateSelectorProps> = ({
                                     {/* Minute markers */}
                                     {Array.from({ length: 60 }, (_, i) => {
                                         if (i % 5 === 0) return null; // Skip where hour markers are
-                                        const angle = (i * 6) - 90;
+                                        const angle = i * 6;
                                         const pos = getClockPosition(angle, 70);
                                         return (
                                             <div
@@ -690,8 +706,9 @@ const CustomDateSelector: React.FC<CustomDateSelectorProps> = ({
                                         {String(selectedTime.minute).padStart(2, '0')}
                                     </span>
                                     <button
+                                        type="button"
                                         className="time-part period-part period-toggle"
-                                        onClick={() => handleTimeChange('period', getDisplayTime().period === 'AM' ? 'PM' : 'AM')}
+                                        onClick={(e) => handleTimeChange('period', getDisplayTime().period === 'AM' ? 'PM' : 'AM', e)}
                                     >
                                         {getDisplayTime().period}
                                     </button>

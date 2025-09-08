@@ -29,11 +29,13 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ userId, currentBalanc
         { value: 'EMI / Loan', label: 'EMI / Loan' },
         { value: 'Credit Card Bill', label: 'Credit Card Bill' },
         { value: 'Family', label: 'Family' },
+        { value: 'Investment', label: 'Investment' },
+        { value: 'Shopping', label: 'Shopping' },
+        { value: 'Travel', label: 'Travel' },
         { value: 'Others', label: 'Others' }
     ];
 
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
+    const handleSubmit = async () => {
         if (!userId || isSubmitting) return;
         setIsSubmitting(true);
 
@@ -81,7 +83,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ userId, currentBalanc
                 <button onClick={() => setIsExpense(false)} className={`tab-button ${!isExpense ? 'active-income' : ''}`}>Income</button>
             </div>
             <h2 className="card-title">{isExpense ? 'Add New Expense' : 'Add New Income'}</h2>
-            <form onSubmit={handleSubmit}>
+            <div>
                 <div className="form-group">
                     <label htmlFor="description">{isExpense ? 'Description' : 'Source'}</label>
                     <input type="text" id="description" value={description} onChange={(e) => setDescription(e.target.value)} placeholder={isExpense ? "e.g., Coffee" : "e.g., Salary"} className="input" required />
@@ -117,10 +119,10 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ userId, currentBalanc
                     <label htmlFor="date">Note</label>
                     <input type="text" id="note" value={note} onChange={(e) => setNote(e.target.value)} className="input" />
                 </div>
-                <button type="submit" disabled={isSubmitting} className={`button ${isExpense ? 'button-expense' : 'button-income'}`}>
+                <button type="button" onClick={handleSubmit} disabled={isSubmitting} className={`button ${isExpense ? 'button-expense' : 'button-income'}`}>
                     {isSubmitting ? 'Adding...' : `Add ${isExpense ? 'Expense' : 'Income'}`}
                 </button>
-            </form>
+            </div>
         </div>
     );
 };

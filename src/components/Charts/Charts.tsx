@@ -30,16 +30,31 @@ const Charts: React.FC<ChartsProps> = ({
     onDetectSalary
 }) => {
     const [timeframe, setTimeframe] = useState<string>("5"); // Default to 5 months
+    const [trendMode, setTrendMode] = useState<'monthly' | 'salary-cycle'>('monthly');
 
     const timeframeOptions = [
         { value: "3", label: "Last 3 months" },
         { value: "6", label: "Last 6 months" },
-        { value: "12", label: "Last 12 months" }
+        { value: "12", label: "Last 12 months" },
+        { value: "salary-cycle", label: "Salary Cycle" }
     ];
 
     const handleDownloadCategorySpending = () => {
         const filename = `category-spending-${new Date().toISOString().slice(0, 7)}.csv`;
         exportCategorySpendingToCSV(expenses, filename);
+    };
+
+    const handleTimeframeChange = (value: string) => {
+        setTimeframe(value);
+        if (value === 'salary-cycle') {
+            setTrendMode('salary-cycle');
+            // Automatically detect salary cycle when selected
+            if (onDetectSalary) {
+                onDetectSalary();
+            }
+        } else {
+            setTrendMode('monthly');
+        }
     };
     const categoryChartData = useMemo(() => {
         const totals = expenses.reduce((acc, e) => {
@@ -62,30 +77,106 @@ const Charts: React.FC<ChartsProps> = ({
         const labels: string[] = [];
         const incomeData: number[] = [];
         const expenseData: number[] = [];
-        const today = new Date();
 
-        for (let i = Number(timeframe) - 1; i >= 0; i--) {
-            const date = new Date(today.getFullYear(), today.getMonth() - i, 1);
-            const year = date.getFullYear();
-            const month = date.getMonth() + 1;
-            const monthKey = `${year}-${String(month).padStart(2, '0')}`;
-            const monthName = date.toLocaleString('default', { month: 'short' });
-            const yearLabel = date.getFullYear();
-            labels.push(`${monthName} ${yearLabel}`);
+        if (trendMode === 'salary-cycle') {
+            // Salary cycle mode - group data by actual salary cycles
+            const allTransactions = [...allIncomes, ...allExpenses];
+            const salaryTransactions = allTransactions.filter(transaction =>
+                transaction.description.toLowerCase().includes('salary')
+            );
 
-            const monthlyIncome = allIncomes.filter(inc => inc.date.startsWith(monthKey)).reduce((sum, inc) => sum + inc.amount, 0);
-            const monthlyExpense = allExpenses.filter(exp => exp.date.startsWith(monthKey)).reduce((sum, exp) => sum + exp.amount, 0);
+            if (salaryTransactions.length > 0) {
+                // Sort salary transactions by date (oldest first)
+                const sortedSalary = salaryTransactions.sort((a, b) =>
+                    new Date(a.date).getTime() - new Date(b.date).getTime()
+                );
 
-            incomeData.push(monthlyIncome);
-            expenseData.push(monthlyExpense);
+                // Create salary cycles
+                const salaryCycles = [];
+                for (let i = 0; i < sortedSalary.length; i++) {
+                    const currentSalary = sortedSalary[i];
+                    const nextSalary = sortedSalary[i + 1];
+
+                    const cycleStart = currentSalary.date.split('T')[0];
+                    const cycleEnd = nextSalary ? nextSalary.date.split('T')[0] : new Date().toISOString().split('T')[0];
+
+                    // Format the label
+                    const startDate = new Date(cycleStart);
+                    const endDate = new Date(cycleEnd);
+                    const startMonth = startDate.toLocaleString('default', { month: 'short' });
+                    const endMonth = endDate.toLocaleString('default', { month: 'short' });
+                    const startDay = startDate.getDate();
+                    const endDay = endDate.getDate();
+
+                    let label;
+                    if (startDate.getFullYear() === endDate.getFullYear()) {
+                        if (startDate.getMonth() === endDate.getMonth()) {
+                            label = `${startMonth} ${startDay}-${endDay}`;
+                        } else {
+                            label = `${startMonth} ${startDay} - ${endMonth} ${endDay}`;
+                        }
+                    } else {
+                        label = `${startMonth} ${startDay} - ${endMonth} ${endDay}`;
+                    }
+
+                    salaryCycles.push({
+                        start: cycleStart,
+                        end: cycleEnd,
+                        label: label
+                    });
+                }
+
+                salaryCycles.forEach(cycle => {
+                    labels.push(cycle.label);
+
+                    const cycleIncome = allIncomes.filter(inc => {
+                        const incDate = inc.date.split('T')[0];
+                        return incDate >= cycle.start && incDate <= cycle.end;
+                    }).reduce((sum, inc) => sum + inc.amount, 0);
+
+                    const cycleExpense = allExpenses.filter(exp => {
+                        const expDate = exp.date.split('T')[0];
+                        return expDate >= cycle.start && expDate <= cycle.end;
+                    }).reduce((sum, exp) => sum + exp.amount, 0);
+
+                    incomeData.push(cycleIncome);
+                    expenseData.push(cycleExpense);
+                });
+            } else {
+                // No salary transactions found
+                labels.push('No Salary Data');
+                incomeData.push(0);
+                expenseData.push(0);
+            }
+        } else {
+            // Monthly mode - existing logic
+            const today = new Date();
+            const monthsToShow = timeframe === 'salary-cycle' ? 5 : Number(timeframe);
+
+            for (let i = monthsToShow - 1; i >= 0; i--) {
+                const date = new Date(today.getFullYear(), today.getMonth() - i, 1);
+                const year = date.getFullYear();
+                const month = date.getMonth() + 1;
+                const monthKey = `${year}-${String(month).padStart(2, '0')}`;
+                const monthName = date.toLocaleString('default', { month: 'short' });
+                const yearLabel = date.getFullYear();
+                labels.push(`${monthName} ${yearLabel}`);
+
+                const monthlyIncome = allIncomes.filter(inc => inc.date.startsWith(monthKey)).reduce((sum, inc) => sum + inc.amount, 0);
+                const monthlyExpense = allExpenses.filter(exp => exp.date.startsWith(monthKey)).reduce((sum, exp) => sum + exp.amount, 0);
+
+                incomeData.push(monthlyIncome);
+                expenseData.push(monthlyExpense);
+            }
         }
+
         return {
             labels, datasets: [
                 { label: 'Income', data: incomeData, backgroundColor: 'rgb(34, 197, 94)' },
                 { label: 'Expense', data: expenseData, backgroundColor: 'rgb(239, 68, 68)' }
             ]
         };
-    }, [allIncomes, allExpenses, timeframe]);
+    }, [allIncomes, allExpenses, timeframe, trendMode]);
 
     return (
         <div className="charts-grid">
@@ -124,7 +215,7 @@ const Charts: React.FC<ChartsProps> = ({
                         <CustomDropdown
                             options={timeframeOptions}
                             value={timeframe}
-                            onChange={setTimeframe}
+                            onChange={handleTimeframeChange}
                             placeholder="Select timeframe"
                         />
                     </div>
