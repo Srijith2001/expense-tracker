@@ -1,0 +1,15 @@
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 50vh;
+}
+
+.login-card {
+    max-width: 400px;
+    text-align: center;
+}
+
+.button-signin {
+    margin-top: 1rem;
+}
