@@ -3,15 +3,32 @@ import { Bar, Pie } from "react-chartjs-2";
 import type { Expense, Income } from "../../config/types";
 import { exportCategorySpendingToCSV, getCategoryColor } from "../../utils/helper";
 import CustomDropdown from "../CustomDropdown/CustomDropdown";
+import CustomMonthSelector from "../CustomMonthSelector/CustomMonthSelector";
 import './Charts.css';
 
 interface ChartsProps {
     expenses: Expense[];
     allIncomes: Income[];
     allExpenses: Expense[];
+    monthFilter: string;
+    onMonthFilterChange: (month: string) => void;
+    onCustomRangeChange?: (range: { start: string; end: string }) => void;
+    customRange?: { start: string; end: string };
+    salaryCycleRange?: { start: string; end: string };
+    onDetectSalary?: () => void;
 }
 
-const Charts: React.FC<ChartsProps> = ({ expenses, allIncomes, allExpenses }) => {
+const Charts: React.FC<ChartsProps> = ({
+    expenses,
+    allIncomes,
+    allExpenses,
+    monthFilter,
+    onMonthFilterChange,
+    onCustomRangeChange,
+    customRange,
+    salaryCycleRange,
+    onDetectSalary
+}) => {
     const [timeframe, setTimeframe] = useState<string>("5"); // Default to 5 months
 
     const timeframeOptions = [
@@ -75,15 +92,26 @@ const Charts: React.FC<ChartsProps> = ({ expenses, allIncomes, allExpenses }) =>
             <div className="card">
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                     <h3 className="card-title" style={{ marginBottom: 0 }}>Category-wise Spend</h3>
-                    <button
-                        onClick={handleDownloadCategorySpending}
-                        className="download-button"
-                        disabled={expenses.length === 0}
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="white" width="16" height="16">
-                            <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
-                        </svg>
-                    </button>
+                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                        <CustomMonthSelector
+                            value={monthFilter}
+                            onChange={onMonthFilterChange}
+                            onCustomRangeChange={onCustomRangeChange}
+                            customRange={customRange}
+                            salaryCycleRange={salaryCycleRange}
+                            onDetectSalary={onDetectSalary}
+                            className="month-selector"
+                        />
+                        <button
+                            onClick={handleDownloadCategorySpending}
+                            className="download-button"
+                            disabled={expenses.length === 0}
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="white" width="16" height="16">
+                                <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+                            </svg>
+                        </button>
+                    </div>
                 </div>
                 <div className="chart-container">
                     {categoryChartData.labels.length > 0 ? <Pie data={categoryChartData} options={{ responsive: true, maintainAspectRatio: false }} /> : <p style={{ textAlign: 'center', paddingTop: '6rem' }}>No expense data for this month.</p>}

@@ -98,7 +98,17 @@ function App() {
         />
       </div>
 
-      <Charts expenses={filteredExpenses} allIncomes={allIncomes} allExpenses={allExpenses} />
+      <Charts
+        expenses={filteredExpenses}
+        allIncomes={allIncomes}
+        allExpenses={allExpenses}
+        monthFilter={monthFilter}
+        onMonthFilterChange={setMonthFilter}
+        onCustomRangeChange={setCustomRange}
+        customRange={customRange}
+        salaryCycleRange={salaryCycleRange}
+        onDetectSalary={detectLatestSalary}
+      />
 
       {showProfileModal && userId && (
         <ProfileModal

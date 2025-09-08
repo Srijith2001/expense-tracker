@@ -16,3 +16,25 @@
     position: relative;
     height: 20rem;
 }
+
+.month-selector {
+    min-width: 200px;
+}
+
+/* Responsive adjustments for charts */
+@media (max-width: 768px) {
+    .charts-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    .month-selector {
+        min-width: 160px;
+    }
+}
+
+@media (max-width: 480px) {
+    .month-selector {
+        min-width: 140px;
+    }
+}
