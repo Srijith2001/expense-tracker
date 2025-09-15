@@ -14,7 +14,7 @@
 }
 
 .balance-title {
-    font-size: 1.25rem;
+    font-size: 1rem;
     font-weight: 600;
     margin: 0;
     color: var(--text-dark);
@@ -39,7 +39,7 @@
 }
 
 .balance-amount {
-    font-size: 2rem;
+    font-size: 1.6rem;
     font-weight: 700;
     color: var(--primary-color);
     text-align: center;
@@ -78,7 +78,7 @@
     flex: 1;
     border: none;
     background: none;
-    font-size: 1.5rem;
+    font-size: 1.3rem;
     font-weight: 600;
     color: var(--text-dark);
     outline: none;
@@ -98,7 +98,7 @@
 }
 
 .balance-date-label {
-    font-size: 0.875rem;
+    font-size: 0.8rem;
     font-weight: 500;
     color: var(--text-dark);
     margin: 0;
@@ -127,6 +127,7 @@
     cursor: pointer;
     transition: all 0.2s ease-in-out;
     min-width: 80px;
+    font-size: 0.9rem;
 }
 
 .save-button:hover:not(:disabled) {
@@ -150,6 +151,7 @@
     cursor: pointer;
     transition: all 0.2s ease-in-out;
     min-width: 80px;
+    font-size: 0.9rem;
 }
 
 .cancel-button:hover:not(:disabled) {

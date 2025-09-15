@@ -39,6 +39,8 @@
 
 .chart-title {
     margin-bottom: 0;
+    font-size: 0.9rem;
+    font-weight: 600;
 }
 
 /* Chart header responsive adjustments */

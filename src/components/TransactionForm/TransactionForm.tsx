@@ -152,7 +152,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ userId, currentBalanc
                             onChange={(e) => setIsTransfer(e.target.checked)}
                             className="checkbox-input"
                         />
-                        <span className="checkbox-text">Mark as Transfer (exclude from summaries and charts)</span>
+                        <span className="checkbox-text">Exclude from expense summaries</span>
                     </label>
                 </div>
                 <button

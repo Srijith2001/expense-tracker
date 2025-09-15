@@ -48,7 +48,7 @@
 }
 
 .modal-title {
-    font-size: 1.25rem;
+    font-size: 1rem;
     font-weight: 600;
     color: var(--text-dark);
     margin: 0;
@@ -98,7 +98,7 @@
 
 .form-group label {
     display: block;
-    font-size: 0.875rem;
+    font-size: 0.8rem;
     font-weight: 500;
     color: #475569;
     margin-bottom: 0.25rem;
@@ -107,13 +107,14 @@
 .input,
 .select {
     width: 100%;
-    padding: 0.75rem 1rem;
+    padding: 0.6rem 0.8rem;
     background-color: #f8fafc;
     border: 1px solid var(--border-color);
     border-radius: 8px;
     box-sizing: border-box;
     transition: border-color 0.2s, box-shadow 0.2s;
     padding-right: 2.5rem;
+    font-size: 0.9rem;
 }
 
 .select {
@@ -249,6 +250,7 @@
     .button {
         width: 100%;
     }
+
 }
 
 /* Checkbox Styles */
@@ -257,17 +259,49 @@
     align-items: center;
     gap: 0.5rem;
     cursor: pointer;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     color: var(--text-light);
 }
 
 .checkbox-input {
-    width: 1.2rem;
-    height: 1.2rem;
+    width: 1rem;
+    height: 1rem;
     accent-color: var(--primary-color);
     cursor: pointer;
+    border-radius: 4px;
+    border: 0.5px solid var(--border-color);
+    transition: all 0.2s ease;
+    vertical-align: middle;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-color: #f8fafc;
+    position: relative;
+}
+
+.checkbox-input:checked {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.checkbox-input:checked::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 0.7rem;
+    font-weight: bold;
+}
+
+.checkbox-input:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px #c7d2fe;
 }
 
 .checkbox-text {
     user-select: none;
+    vertical-align: middle;
+    margin-left: 0.25rem;
 }

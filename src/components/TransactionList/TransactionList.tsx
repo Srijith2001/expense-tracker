@@ -80,7 +80,7 @@ const TransactionList: React.FC<TransactionListProps> = ({ transactions, userId 
                 <thead>
                     <tr>
                         <th>Description</th>
-                        <th>Category/Source</th>
+                        <th>Category</th>
                         <th>Date & Time</th>
                         <th className="text-right">Amount</th>
                         <th className="text-right">Running Balance</th>
@@ -148,7 +148,7 @@ const TransactionList: React.FC<TransactionListProps> = ({ transactions, userId 
                                                 onClick={() => handleToggleTransfer(t)}
                                                 className={`exclude-button ${t.isTransfer ? 'excluded' : ''}`}
                                             >
-                                                {t.isTransfer ? 'Included' : 'Exclude from expense'}
+                                                {t.isTransfer ? 'Excluded' : 'Exclude from expense'}
                                             </button>
                                         </div>
                                     </td>
