@@ -22,7 +22,8 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
     onUpdate,
     userId
 }) => {
-    const [isExpense, setIsExpense] = useState<boolean>(true);
+    const [transactionType, setTransactionType] = useState<'expense' | 'income'>('expense');
+    const [isTransfer, setIsTransfer] = useState<boolean>(false);
     const [description, setDescription] = useState<string>('');
     const [amount, setAmount] = useState<string>('');
     const [date, setDate] = useState<string>('');
@@ -47,16 +48,26 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
         { value: 'Others', label: 'Others' }
     ];
 
+
     // Initialize form when transaction changes
     useEffect(() => {
         if (transaction) {
             const isExpenseTransaction = 'category' in transaction;
+            const isBalanceTransaction = 'type' in transaction && (transaction as Balance).type === 'balance';
 
-            setIsExpense(isExpenseTransaction);
+            if (isExpenseTransaction) {
+                setTransactionType('expense');
+            } else if (isBalanceTransaction) {
+                setTransactionType('income'); // Balance adjustments are treated as income
+            } else {
+                setTransactionType('income');
+            }
+
             setDescription(transaction.description);
             setAmount(transaction.amount.toString());
             setDate(transaction.date);
             setNote(transaction.note);
+            setIsTransfer(transaction.isTransfer || false);
 
             if (isExpenseTransaction) {
                 setCategory((transaction as Expense).category);
@@ -83,10 +94,11 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
             return;
         }
 
+
         setIsSubmitting(true);
 
         try {
-            const transactionType = 'category' in transaction ? 'expense' :
+            const detectedTransactionType = 'category' in transaction ? 'expense' :
                 'type' in transaction && (transaction as Balance).type === 'balance' ? 'balance' : 'income';
 
             const newAmount = parseFloat(amount);
@@ -101,29 +113,31 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
                 amount: newAmount,
                 note: note.trim(),
                 date,
+                isTransfer,
                 updatedAt: getCurrentISTDate()
             };
 
-            if (isExpense) {
+            if (transactionType === 'expense') {
                 updateData.category = category;
             }
 
             // Update the transaction
-            await updateTransaction(userId, transaction.id, transactionType, updateData);
+            await updateTransaction(userId, transaction.id, detectedTransactionType, updateData);
 
             // Recalculate running balances if amount or date changed
             if (amountChanged || dateChanged) {
                 await recalculateRunningBalances(
                     userId,
                     transaction.id,
-                    transactionType,
+                    detectedTransactionType,
                     date,
                     newAmount,
-                    isExpense
+                    transactionType === 'expense'
                 );
             }
 
-            const transactionTypeName = isExpense ? 'Expense' : 'type' in transaction && (transaction as Balance).type === 'balance' ? 'Balance' : 'Income';
+            const transactionTypeName = transactionType === 'expense' ? 'Expense' :
+                'type' in transaction && (transaction as Balance).type === 'balance' ? 'Balance' : 'Income';
             showSuccess(`${transactionTypeName} "${description}" updated successfully!`);
 
             onUpdate();
@@ -145,13 +159,15 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
     if (!isOpen || !transaction) return null;
 
     const isExpenseTransaction = 'category' in transaction;
+    const isBalanceTransaction = 'type' in transaction && (transaction as Balance).type === 'balance';
 
     return (
         <div className="modal-overlay" onClick={handleClose}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
                 <div className="modal-header">
                     <h2 className="modal-title">
-                        Edit {isExpenseTransaction ? 'Expense' : 'type' in transaction && (transaction as Balance).type === 'balance' ? 'Balance' : 'Income'}
+                        Edit {isExpenseTransaction ? 'Expense' :
+                            isBalanceTransaction ? 'Balance' : 'Income'}
                     </h2>
                     <button
                         className="modal-close-button"
@@ -167,14 +183,16 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
                 <div className="modal-body">
                     <div className="form-group">
                         <label htmlFor="description">
-                            {isExpenseTransaction ? 'Description' : 'type' in transaction && (transaction as Balance).type === 'balance' ? 'Description' : 'Source'}
+                            {isExpenseTransaction ? 'Description' :
+                                isBalanceTransaction ? 'Description' : 'Source'}
                         </label>
                         <input
                             type="text"
                             id="description"
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
-                            placeholder={isExpenseTransaction ? "e.g., Coffee" : 'type' in transaction && (transaction as Balance).type === 'balance' ? "e.g., Balance Adjustment" : "e.g., Salary"}
+                            placeholder={isExpenseTransaction ? "e.g., Coffee" :
+                                isBalanceTransaction ? "e.g., Balance Adjustment" : "e.g., Salary"}
                             className="input"
                             required
                         />
@@ -192,6 +210,7 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
                             />
                         </div>
                     )}
+
 
                     <div className="form-group">
                         <label htmlFor="amount">Amount</label>
@@ -230,6 +249,17 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
                             className="input"
                         />
                     </div>
+                    <div className="form-group">
+                        <label className="checkbox-label">
+                            <input
+                                type="checkbox"
+                                checked={isTransfer}
+                                onChange={(e) => setIsTransfer(e.target.checked)}
+                                className="checkbox-input"
+                            />
+                            <span className="checkbox-text">Mark as Transfer (exclude from summaries and charts)</span>
+                        </label>
+                    </div>
                 </div>
 
                 <div className="modal-footer">
@@ -245,9 +275,13 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
                         type="button"
                         onClick={handleSubmit}
                         disabled={isSubmitting || !description.trim() || !amount || parseFloat(amount) <= 0 || !date}
-                        className={`modal-button ${isExpenseTransaction ? 'modal-button-expense' : 'type' in transaction && (transaction as Balance).type === 'balance' ? 'modal-button-balance' : 'modal-button-income'}`}
+                        className={`modal-button ${isExpenseTransaction ? 'modal-button-expense' :
+                            isBalanceTransaction ? 'modal-button-balance' : 'modal-button-income'
+                            }`}
                     >
-                        {isSubmitting ? 'Updating...' : `Update ${isExpenseTransaction ? 'Expense' : 'type' in transaction && (transaction as Balance).type === 'balance' ? 'Balance' : 'Income'}`}
+                        {isSubmitting ? 'Updating...' : `Update ${isExpenseTransaction ? 'Expense' :
+                            isBalanceTransaction ? 'Balance' : 'Income'
+                            }`}
                     </button>
                 </div>
             </div>

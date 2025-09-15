@@ -13,7 +13,8 @@ interface TransactionFormProps {
 }
 
 const TransactionForm: React.FC<TransactionFormProps> = ({ userId, currentBalance }) => {
-    const [isExpense, setIsExpense] = useState<boolean>(true);
+    const [transactionType, setTransactionType] = useState<'expense' | 'income'>('expense');
+    const [isTransfer, setIsTransfer] = useState<boolean>(false);
     const [description, setDescription] = useState<string>('');
     const [amount, setAmount] = useState<string>('');
     const [date, setDate] = useState<string>(getCurrentISTDate());
@@ -38,12 +39,13 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ userId, currentBalanc
         { value: 'Others', label: 'Others' }
     ];
 
+
     const handleSubmit = async () => {
         if (!userId || isSubmitting) return;
         setIsSubmitting(true);
 
         try {
-            if (isExpense) {
+            if (transactionType === 'expense') {
                 const expensesCol = collection(db, 'artifacts', appId, 'users', userId, 'expenses');
                 await addDoc(expensesCol,
                     {
@@ -53,10 +55,11 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ userId, currentBalanc
                         runningBalance: currentBalance - parseFloat(amount),
                         note,
                         date,
+                        isTransfer,
                         createdAt: serverTimestamp()
                     });
                 showSuccess(`Expense "${description}" added successfully!`);
-            } else {
+            } else if (transactionType === 'income') {
                 const incomesCol = collection(db, 'artifacts', appId, 'users', userId, 'incomes');
                 await addDoc(incomesCol,
                     {
@@ -65,6 +68,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ userId, currentBalanc
                         runningBalance: currentBalance + parseFloat(amount),
                         note,
                         date,
+                        isTransfer,
                         createdAt: serverTimestamp()
                     });
                 showSuccess(`Income "${description}" added successfully!`);
@@ -73,7 +77,8 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ userId, currentBalanc
             setAmount('');
             setDate(getCurrentISTDate());
             setCategory('Food');
-            setNote('')
+            setNote('');
+            setIsTransfer(false);
         } catch (error) {
             console.error("Error adding document: ", error);
             showError('Failed to add transaction. Please try again.');
@@ -85,16 +90,30 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ userId, currentBalanc
     return (
         <div className="card">
             <div className="transaction-form-tabs">
-                <button onClick={() => setIsExpense(true)} className={`tab-button ${isExpense ? 'active-expense' : ''}`}>Expense</button>
-                <button onClick={() => setIsExpense(false)} className={`tab-button ${!isExpense ? 'active-income' : ''}`}>Income</button>
+                <button onClick={() => setTransactionType('expense')} className={`tab-button ${transactionType === 'expense' ? 'active-expense' : ''}`}>Expense</button>
+                <button onClick={() => setTransactionType('income')} className={`tab-button ${transactionType === 'income' ? 'active-income' : ''}`}>Income</button>
             </div>
-            <h2 className="card-title">{isExpense ? 'Add New Expense' : 'Add New Income'}</h2>
+            <h2 className="card-title">
+                {transactionType === 'expense' ? 'Add New Expense' : 'Add New Income'}
+            </h2>
             <div>
                 <div className="form-group">
-                    <label htmlFor="description">{isExpense ? 'Description' : 'Source'}</label>
-                    <input type="text" id="description" value={description} onChange={(e) => setDescription(e.target.value)} placeholder={isExpense ? "e.g., Coffee" : "e.g., Salary"} className="input" required />
+                    <label htmlFor="description">
+                        {transactionType === 'expense' ? 'Description' : 'Source'}
+                    </label>
+                    <input
+                        type="text"
+                        id="description"
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        placeholder={
+                            transactionType === 'expense' ? "e.g., Coffee" : "e.g., Salary"
+                        }
+                        className="input"
+                        required
+                    />
                 </div>
-                {isExpense && (
+                {transactionType === 'expense' && (
                     <div className="form-group">
                         <label htmlFor="category">Category</label>
                         <CustomDropdown
@@ -125,8 +144,24 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ userId, currentBalanc
                     <label htmlFor="date">Note</label>
                     <input type="text" id="note" value={note} onChange={(e) => setNote(e.target.value)} className="input" />
                 </div>
-                <button type="button" onClick={handleSubmit} disabled={isSubmitting} className={`button ${isExpense ? 'button-expense' : 'button-income'}`}>
-                    {isSubmitting ? 'Adding...' : `Add ${isExpense ? 'Expense' : 'Income'}`}
+                <div className="form-group">
+                    <label className="checkbox-label">
+                        <input
+                            type="checkbox"
+                            checked={isTransfer}
+                            onChange={(e) => setIsTransfer(e.target.checked)}
+                            className="checkbox-input"
+                        />
+                        <span className="checkbox-text">Mark as Transfer (exclude from summaries and charts)</span>
+                    </label>
+                </div>
+                <button
+                    type="button"
+                    onClick={handleSubmit}
+                    disabled={isSubmitting}
+                    className={`button ${transactionType === 'expense' ? 'button-expense' : 'button-income'}`}
+                >
+                    {isSubmitting ? 'Adding...' : `Add ${transactionType === 'expense' ? 'Expense' : 'Income'}`}
                 </button>
             </div>
         </div>

@@ -99,6 +99,11 @@ export const useTransactions = (userId: string | null) => {
         const filteredIncomes = allIncomes.filter(i => filterTransactions(i.date));
         const filteredBalances = allBalances.filter(b => filterTransactions(b.date));
 
+        // Filter out transactions marked as transfers for summaries and charts
+        const filteredExpensesForSummary = filteredExpenses.filter(e => !e.isTransfer);
+        const filteredIncomesForSummary = filteredIncomes.filter(i => !i.isTransfer);
+        const filteredBalancesForSummary = filteredBalances.filter(b => !b.isTransfer);
+
         const transactions: AnyTransaction[] = [...filteredExpenses, ...filteredIncomes, ...filteredBalances]
             .sort((a, b) => {
                 const dateA = new Date(a.date).getTime();
@@ -106,7 +111,7 @@ export const useTransactions = (userId: string | null) => {
                 return dateB - dateA;
             });
 
-        // Calculate current balance: sum of all incomes + balance adjustments - sum of all expenses
+        // Calculate current balance: sum of all incomes + balance adjustments - sum of all expenses (including transfers)
         const totalIncome = allIncomes.reduce((sum, income) => sum + income.amount, 0);
         const totalExpenses = allExpenses.reduce((sum, expense) => sum + expense.amount, 0);
         const balanceAdjustments = allBalances.reduce((sum, balance) => {
@@ -116,7 +121,12 @@ export const useTransactions = (userId: string | null) => {
 
         const currentBalance = totalIncome + balanceAdjustments - totalExpenses;
 
-        return { filteredExpenses, filteredIncomes, transactions, currentBalance };
+        return {
+            filteredExpenses: filteredExpensesForSummary,
+            filteredIncomes: filteredIncomesForSummary,
+            transactions,
+            currentBalance
+        };
     }, [allExpenses, allIncomes, allBalances, monthFilter, customRange, salaryCycleRange]);
 
     return {

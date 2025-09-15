@@ -28,6 +28,11 @@
     border-bottom-color: var(--green-color);
 }
 
+.tab-button.active-transfer {
+    color: #f59e0b;
+    border-bottom-color: #f59e0b;
+}
+
 .form-group {
     margin-bottom: 1rem;
 }
@@ -110,6 +115,14 @@
     background-color: #15803d;
 }
 
+.button-transfer {
+    background-color: #f59e0b;
+}
+
+.button-transfer:hover {
+    background-color: #d97706;
+}
+
 .button-signin {
     background-color: var(--primary-color);
 }
@@ -144,4 +157,25 @@
 .transaction-date-selector .date-trigger.open {
     border-color: var(--primary-color);
     box-shadow: 0 0 0 2px #c7d2fe;
+}
+
+/* Checkbox Styles */
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: var(--text-light);
+}
+
+.checkbox-input {
+    width: 1.2rem;
+    height: 1.2rem;
+    accent-color: var(--primary-color);
+    cursor: pointer;
+}
+
+.checkbox-text {
+    user-select: none;
 }

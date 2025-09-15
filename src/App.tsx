@@ -97,16 +97,18 @@ function AppContent() {
           <TransactionForm userId={userId} currentBalance={currentBalance} />
         </div>
 
-        <TransactionHistory
-          transactions={transactions}
-          userId={userId}
-          monthFilter={monthFilter}
-          onMonthFilterChange={setMonthFilter}
-          onCustomRangeChange={setCustomRange}
-          customRange={customRange}
-          salaryCycleRange={salaryCycleRange}
-          onDetectSalary={detectLatestSalary}
-        />
+        <div className="grid-col-span-1">
+          <TransactionHistory
+            transactions={transactions}
+            userId={userId}
+            monthFilter={monthFilter}
+            onMonthFilterChange={setMonthFilter}
+            onCustomRangeChange={setCustomRange}
+            customRange={customRange}
+            salaryCycleRange={salaryCycleRange}
+            onDetectSalary={detectLatestSalary}
+          />
+        </div>
       </div>
 
       <Charts

@@ -1,5 +1,5 @@
 
-import { deleteDoc, doc } from "firebase/firestore";
+import { deleteDoc, doc, updateDoc } from "firebase/firestore";
 import React, { useState } from "react";
 import { appId, db } from "../../config/firebase";
 import type { AnyTransaction, Balance, Expense } from "../../config/types";
@@ -52,6 +52,28 @@ const TransactionList: React.FC<TransactionListProps> = ({ transactions, userId 
         // The transaction list will refresh due to Firebase real-time updates
     };
 
+    const handleToggleTransfer = async (transaction: AnyTransaction) => {
+        const transactionType = 'category' in transaction ? 'expense' :
+            'type' in transaction && (transaction as Balance).type === 'balance' ? 'balance' : 'income';
+
+        const collectionName = transactionType === 'expense' ? 'expenses' :
+            transactionType === 'income' ? 'incomes' : 'balances';
+
+        const docRef = doc(db, 'artifacts', appId, 'users', userId, collectionName, transaction.id);
+
+        try {
+            await updateDoc(docRef, {
+                isTransfer: !transaction.isTransfer
+            });
+
+            const status = !transaction.isTransfer ? 'marked as transfer' : 'unmarked as transfer';
+            showSuccess(`Transaction "${transaction.description}" ${status}!`);
+        } catch (error) {
+            console.error("Error updating transfer status: ", error);
+            showError('Failed to update transfer status. Please try again.');
+        }
+    };
+
     return (
         <div className="transaction-list-container">
             <table className="transaction-table">
@@ -74,7 +96,7 @@ const TransactionList: React.FC<TransactionListProps> = ({ transactions, userId 
                             const isExpense = 'category' in t;
                             const isBalance = 'type' in t && (t as Balance).type === 'balance';
                             return (
-                                <tr key={t.id}>
+                                <tr key={t.id} className={t.isTransfer ? 'transfer-row' : ''}>
                                     <td>{t.description}</td>
                                     <td>
                                         <span className={`category-tag ${isExpense ? getCategoryClass((t as Expense).category) :
@@ -121,6 +143,12 @@ const TransactionList: React.FC<TransactionListProps> = ({ transactions, userId 
                                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
                                                     <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clipRule="evenodd" />
                                                 </svg>
+                                            </button>
+                                            <button
+                                                onClick={() => handleToggleTransfer(t)}
+                                                className={`exclude-button ${t.isTransfer ? 'excluded' : ''}`}
+                                            >
+                                                {t.isTransfer ? 'Included' : 'Exclude from expense'}
                                             </button>
                                         </div>
                                     </td>

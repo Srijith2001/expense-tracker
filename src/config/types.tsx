@@ -6,6 +6,7 @@ export interface BaseTransaction {
     runningBalance: number;
     note: string;
     date: string; // ISO string YYYY-MM-DD
+    isTransfer?: boolean; // Optional field to mark transactions as transfers
 }
 
 export interface Expense extends BaseTransaction {
