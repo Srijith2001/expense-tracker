@@ -102,7 +102,6 @@ export const useTransactions = (userId: string | null) => {
         // Filter out transactions marked as transfers for summaries and charts
         const filteredExpensesForSummary = filteredExpenses.filter(e => !e.isTransfer);
         const filteredIncomesForSummary = filteredIncomes.filter(i => !i.isTransfer);
-        const filteredBalancesForSummary = filteredBalances.filter(b => !b.isTransfer);
 
         const transactions: AnyTransaction[] = [...filteredExpenses, ...filteredIncomes, ...filteredBalances]
             .sort((a, b) => {

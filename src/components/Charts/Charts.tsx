@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Bar, Pie } from "react-chartjs-2";
 import type { Expense, Income } from "../../config/types";
 import { getCurrentISTDateOnly, getCurrentISTMonth } from "../../utils/dateUtils";
@@ -33,8 +33,6 @@ const Charts: React.FC<ChartsProps> = ({
     const [timeframe, setTimeframe] = useState<string>("5"); // Default to 5 months
     const [trendMode, setTrendMode] = useState<'monthly' | 'salary-cycle'>('monthly');
     const [chartKey, setChartKey] = useState(0);
-    const pieChartRef = useRef<any>(null);
-    const barChartRef = useRef<any>(null);
 
     // Handle window resize to force chart redraw
     useEffect(() => {
