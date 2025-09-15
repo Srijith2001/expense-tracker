@@ -62,12 +62,14 @@ const CustomMonthSelector: React.FC<CustomMonthSelectorProps> = ({
                 const startFormatted = startDate.toLocaleDateString('en-US', {
                     year: 'numeric',
                     month: '2-digit',
-                    day: '2-digit'
+                    day: '2-digit',
+                    timeZone: 'Asia/Kolkata'
                 });
                 const endFormatted = endDate.toLocaleDateString('en-US', {
                     year: 'numeric',
                     month: '2-digit',
-                    day: '2-digit'
+                    day: '2-digit',
+                    timeZone: 'Asia/Kolkata'
                 });
                 setSelectedLabel(`${startFormatted} - ${endFormatted}`);
             } else {
@@ -80,12 +82,14 @@ const CustomMonthSelector: React.FC<CustomMonthSelectorProps> = ({
                 const startFormatted = startDate.toLocaleDateString('en-US', {
                     year: 'numeric',
                     month: '2-digit',
-                    day: '2-digit'
+                    day: '2-digit',
+                    timeZone: 'Asia/Kolkata'
                 });
                 const endFormatted = endDate.toLocaleDateString('en-US', {
                     year: 'numeric',
                     month: '2-digit',
-                    day: '2-digit'
+                    day: '2-digit',
+                    timeZone: 'Asia/Kolkata'
                 });
                 setSelectedLabel(`Salary Cycle: ${startFormatted} - ${endFormatted}`);
             } else {
@@ -95,7 +99,8 @@ const CustomMonthSelector: React.FC<CustomMonthSelectorProps> = ({
             const date = new Date(value + '-01');
             const formattedDate = date.toLocaleDateString('en-US', {
                 year: 'numeric',
-                month: '2-digit'
+                month: '2-digit',
+                timeZone: 'Asia/Kolkata'
             });
             setSelectedLabel(formattedDate);
         } else {

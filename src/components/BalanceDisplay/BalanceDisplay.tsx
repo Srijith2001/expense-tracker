@@ -1,6 +1,8 @@
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import React, { useState } from 'react';
 import { appId, db } from '../../config/firebase';
+import { useToast } from '../../contexts/ToastContext';
+import { getCurrentISTDate } from '../../utils/dateUtils';
 import CustomDateSelector from '../CustomDateSelector/CustomDateSelector';
 import './BalanceDisplay.css';
 
@@ -13,28 +15,29 @@ interface BalanceDisplayProps {
 const BalanceDisplay: React.FC<BalanceDisplayProps> = ({ userId, currentBalance, onBalanceUpdate }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [editValue, setEditValue] = useState(currentBalance.toString());
-    const [editDate, setEditDate] = useState(new Date().toISOString().slice(0, 16));
+    const [editDate, setEditDate] = useState(getCurrentISTDate());
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const { showSuccess, showError } = useToast();
 
     const formatCurrency = (amount: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(amount);
 
     const handleEdit = () => {
         setIsEditing(true);
         setEditValue(currentBalance.toString());
-        setEditDate(new Date().toISOString().slice(0, 16));
+        setEditDate(getCurrentISTDate());
     };
 
     const handleCancel = () => {
         setIsEditing(false);
         setEditValue(currentBalance.toString());
-        setEditDate(new Date().toISOString().slice(0, 16));
+        setEditDate(getCurrentISTDate());
     };
 
     const handleSave = async () => {
         const newBalance = parseFloat(editValue);
 
         if (isNaN(newBalance)) {
-            alert('Please enter a valid number');
+            showError('Please enter a valid number');
             return;
         }
 
@@ -64,9 +67,13 @@ const BalanceDisplay: React.FC<BalanceDisplayProps> = ({ userId, currentBalance,
 
             onBalanceUpdate(newBalance);
             setIsEditing(false);
+
+            const balanceChange = newBalance - currentBalance;
+            const changeText = balanceChange > 0 ? `increased by ₹${balanceChange.toFixed(2)}` : `decreased by ₹${Math.abs(balanceChange).toFixed(2)}`;
+            showSuccess(`Balance ${changeText} successfully!`);
         } catch (error) {
             console.error("Error updating balance:", error);
-            alert('Failed to update balance. Please try again.');
+            showError('Failed to update balance. Please try again.');
         } finally {
             setIsSubmitting(false);
         }
@@ -118,7 +125,7 @@ const BalanceDisplay: React.FC<BalanceDisplayProps> = ({ userId, currentBalance,
                             value={editDate}
                             onChange={setEditDate}
                             placeholder="Select date and time"
-                            max={new Date().toISOString().slice(0, 16)}
+                            max={getCurrentISTDate()}
                             includeTime={true}
                             className="balance-date-selector"
                         />

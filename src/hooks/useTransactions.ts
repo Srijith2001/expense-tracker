@@ -1,20 +1,21 @@
 import { useEffect, useMemo, useState } from 'react';
 import { subscribeToBalances, subscribeToExpenses, subscribeToIncomes } from '../config/firebase';
 import type { AnyTransaction, Balance, Expense, Income } from '../config/types';
+import { getCurrentISTDateOnly, getCurrentISTMonth } from '../utils/dateUtils';
 
 export const useTransactions = (userId: string | null) => {
     const [allExpenses, setAllExpenses] = useState<Expense[]>([]);
     const [allIncomes, setAllIncomes] = useState<Income[]>([]);
     const [allBalances, setAllBalances] = useState<Balance[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
-    const [monthFilter, setMonthFilter] = useState<string>(new Date().toISOString().slice(0, 7));
+    const [monthFilter, setMonthFilter] = useState<string>(getCurrentISTMonth());
     const [customRange, setCustomRange] = useState<{ start: string; end: string }>({
-        start: new Date().toISOString().slice(0, 7) + '-01',
-        end: new Date().toISOString().slice(0, 7) + '-31'
+        start: getCurrentISTMonth() + '-01',
+        end: getCurrentISTMonth() + '-31'
     });
     const [salaryCycleRange, setSalaryCycleRange] = useState<{ start: string; end: string }>({
         start: '',
-        end: new Date().toISOString().split('T')[0]
+        end: getCurrentISTDateOnly()
     });
 
     useEffect(() => {
@@ -68,7 +69,7 @@ export const useTransactions = (userId: string | null) => {
 
             const latestSalary = sortedSalary[0];
             const salaryDate = latestSalary.date.split('T')[0]; // Extract date part
-            const today = new Date().toISOString().split('T')[0];
+            const today = getCurrentISTDateOnly();
 
             setSalaryCycleRange({
                 start: salaryDate,

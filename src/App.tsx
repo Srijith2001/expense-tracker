@@ -19,9 +19,20 @@ import TransactionHistory from './components/TransactionHistory/TransactionHisto
 import { useAuth } from './hooks/useAuth';
 import { useTransactions } from './hooks/useTransactions';
 
+// Context
+import { ToastProvider } from './contexts/ToastContext';
+
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title);
 
 function App() {
+  return (
+    <ToastProvider>
+      <AppContent />
+    </ToastProvider>
+  );
+}
+
+function AppContent() {
   const {
     userId,
     isSigningIn,
@@ -71,7 +82,7 @@ function App() {
       />
 
       <div className="dashboard-grid">
-        <div className="grid-col-span-1" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+        <div className="grid-col-span-1" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <BalanceDisplay
             userId={userId}
             currentBalance={currentBalance}

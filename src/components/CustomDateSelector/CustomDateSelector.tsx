@@ -55,7 +55,7 @@ const CustomDateSelector: React.FC<CustomDateSelectorProps> = ({
             dateOptions.hour12 = true;
         }
 
-        return date.toLocaleDateString('en-IN', dateOptions);
+        return date.toLocaleDateString('en-IN', { ...dateOptions, timeZone: 'Asia/Kolkata' });
     };
 
     // Update display value when value changes

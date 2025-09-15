@@ -25,7 +25,7 @@ body {
 .container {
   max-width: 100%;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 1rem;
 }
 
 .header h1 {
@@ -42,8 +42,8 @@ body {
 .dashboard-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 2rem;
-  margin-top: 2rem;
+  gap: 1rem;
+  margin-top: 1rem;
 }
 
 @media (min-width: 1024px) {
@@ -63,7 +63,7 @@ body {
 /* --- Card & General Elements --- */
 .card {
   background-color: var(--card-background);
-  padding: 1.5rem;
+  padding: 1rem;
   border-radius: var(--border-radius);
   box-shadow: var(--shadow);
 }

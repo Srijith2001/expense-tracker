@@ -1,6 +1,8 @@
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import React, { useState } from "react";
 import { appId, db, saveUserProfile } from "../../config/firebase";
+import { useToast } from "../../contexts/ToastContext";
+import { getCurrentISTDateOnly } from "../../utils/dateUtils";
 import { formatToINRText } from "../../utils/helper";
 import './ProfileModal.css';
 
@@ -13,9 +15,13 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ userId, onClose }) => {
     const [name, setName] = useState("");
     const [initialBalance, setInitialBalance] = useState(0);
     const [saving, setSaving] = useState(false);
+    const { showSuccess, showError } = useToast();
 
     const handleSave = async () => {
-        if (!name) return alert("Name is required");
+        if (!name) {
+            showError("Name is required");
+            return;
+        }
         setSaving(true);
         try {
             await saveUserProfile(userId, name, initialBalance);
@@ -28,17 +34,18 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ userId, onClose }) => {
                 await addDoc(balancesCol, {
                     description,
                     amount: initialBalance,
-                    date: new Date().toISOString().slice(0, 10),
+                    date: getCurrentISTDateOnly(),
                     runningBalance: initialBalance,
                     type: 'balance',
                     createdAt: serverTimestamp()
                 });
             }
 
+            showSuccess(`Profile saved successfully! Welcome, ${name}!`);
             onClose({ name, initialBalance });
         } catch (err) {
             console.error(err);
-            alert("Failed to save profile");
+            showError("Failed to save profile. Please try again.");
         } finally {
             setSaving(false);
         }

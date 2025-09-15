@@ -2,39 +2,118 @@
 .charts-grid {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 2rem;
-    margin-top: 2rem;
-}
-
-@media (min-width: 1024px) {
-    .charts-grid {
-        grid-template-columns: 1fr 1fr;
-    }
+    gap: 1rem;
+    margin-top: 1rem;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 .chart-container {
     position: relative;
     height: 20rem;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .month-selector {
     min-width: 200px;
+    max-width: 100%;
 }
 
-/* Responsive adjustments for charts */
+/* Chart Header Styles */
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    gap: 1rem;
+}
+
+.chart-header-controls {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.chart-title {
+    margin-bottom: 0;
+}
+
+/* Chart header responsive adjustments */
 @media (max-width: 768px) {
-    .charts-grid {
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
+    .chart-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.75rem;
     }
 
-    .month-selector {
-        min-width: 160px;
+    .chart-header-controls {
+        justify-content: space-between;
+        flex-wrap: wrap;
     }
 }
 
 @media (max-width: 480px) {
+    .chart-header-controls {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.5rem;
+    }
+}
+
+/* Responsive adjustments for charts */
+
+@media (min-width: 1200px) {
+    .charts-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+    }
+
+    .chart-container {
+        min-width: 0;
+    }
+}
+
+@media (max-width: 1199px) {
+    .charts-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .charts-grid {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+        padding: 0;
+    }
+
+    .chart-container {
+        height: 16rem;
+        min-width: 0;
+    }
+
     .month-selector {
         min-width: 140px;
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .charts-grid {
+        padding: 0;
+        gap: 0.5rem;
+    }
+
+    .chart-container {
+        height: 14rem;
+        min-width: 0;
+    }
+
+    .month-selector {
+        min-width: 120px;
+        max-width: 100%;
     }
 }

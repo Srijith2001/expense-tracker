@@ -1,6 +1,8 @@
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import React, { useState } from "react";
 import { appId, db } from "../../config/firebase";
+import { useToast } from "../../contexts/ToastContext";
+import { getCurrentISTDate } from "../../utils/dateUtils";
 import CustomDateSelector from "../CustomDateSelector/CustomDateSelector";
 import CustomDropdown from "../CustomDropdown/CustomDropdown";
 import './TransactionForm.css';
@@ -14,10 +16,11 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ userId, currentBalanc
     const [isExpense, setIsExpense] = useState<boolean>(true);
     const [description, setDescription] = useState<string>('');
     const [amount, setAmount] = useState<string>('');
-    const [date, setDate] = useState<string>(new Date().toISOString().slice(0, 16));
+    const [date, setDate] = useState<string>(getCurrentISTDate());
     const [note, setNote] = useState<string>('');
     const [category, setCategory] = useState<string>('Food');
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+    const { showSuccess, showError } = useToast();
 
     const categoryOptions = [
         { value: 'Food', label: 'Food' },
@@ -47,30 +50,33 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ userId, currentBalanc
                         description,
                         category,
                         amount: parseFloat(amount),
-                        runningBalance: currentBalance - parseInt(amount),
+                        runningBalance: currentBalance - parseFloat(amount),
                         note,
                         date,
                         createdAt: serverTimestamp()
                     });
+                showSuccess(`Expense "${description}" added successfully!`);
             } else {
                 const incomesCol = collection(db, 'artifacts', appId, 'users', userId, 'incomes');
                 await addDoc(incomesCol,
                     {
                         description,
                         amount: parseFloat(amount),
-                        runningBalance: currentBalance + parseInt(amount),
+                        runningBalance: currentBalance + parseFloat(amount),
                         note,
                         date,
                         createdAt: serverTimestamp()
                     });
+                showSuccess(`Income "${description}" added successfully!`);
             }
             setDescription('');
             setAmount('');
-            setDate(new Date().toISOString().slice(0, 16));
+            setDate(getCurrentISTDate());
             setCategory('Food');
             setNote('')
         } catch (error) {
             console.error("Error adding document: ", error);
+            showError('Failed to add transaction. Please try again.');
         } finally {
             setIsSubmitting(false);
         }
@@ -110,7 +116,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ userId, currentBalanc
                         value={date}
                         onChange={setDate}
                         placeholder="Select date and time"
-                        max={new Date().toISOString().slice(0, 16)}
+                        max={getCurrentISTDate()}
                         includeTime={true}
                         className="transaction-date-selector"
                     />

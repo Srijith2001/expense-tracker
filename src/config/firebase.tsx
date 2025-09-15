@@ -8,7 +8,7 @@ import {
     getFirestore,
     onSnapshot,
     orderBy,
-    query, setDoc
+    query, setDoc, updateDoc, writeBatch
 } from "firebase/firestore";
 import type { Balance, Expense, Income } from './types';
 
@@ -167,6 +167,133 @@ export async function deleteUserAccount(userId: string) {
         throw err;
     }
 }
+
+// --- Transaction Update Functions ---
+export const updateTransaction = async (
+    userId: string,
+    transactionId: string,
+    transactionType: 'expense' | 'income' | 'balance',
+    updateData: any
+) => {
+    const collectionName = transactionType === 'expense' ? 'expenses' :
+        transactionType === 'income' ? 'incomes' : 'balances';
+
+    const docRef = doc(db, 'artifacts', appId, 'users', userId, collectionName, transactionId);
+    await updateDoc(docRef, updateData);
+};
+
+export const recalculateRunningBalances = async (
+    userId: string,
+    editedTransactionId: string,
+    editedTransactionType: 'expense' | 'income' | 'balance',
+    editedTransactionDate: string,
+    editedTransactionAmount: number,
+    _isExpense: boolean
+) => {
+    try {
+        // Get all transactions sorted by date (oldest first)
+        const allTransactions: any[] = [];
+
+        // Get expenses
+        const expensesCol = collection(db, 'artifacts', appId, 'users', userId, 'expenses');
+        const expensesQuery = query(expensesCol, orderBy('date', 'asc'));
+        const expensesSnapshot = await getDocs(expensesQuery);
+        expensesSnapshot.docs.forEach(doc => {
+            allTransactions.push({ id: doc.id, ...doc.data(), type: 'expense' });
+        });
+
+        // Get incomes
+        const incomesCol = collection(db, 'artifacts', appId, 'users', userId, 'incomes');
+        const incomesQuery = query(incomesCol, orderBy('date', 'asc'));
+        const incomesSnapshot = await getDocs(incomesQuery);
+        incomesSnapshot.docs.forEach(doc => {
+            allTransactions.push({ id: doc.id, ...doc.data(), type: 'income' });
+        });
+
+        // Get balances
+        const balancesCol = collection(db, 'artifacts', appId, 'users', userId, 'balances');
+        const balancesQuery = query(balancesCol, orderBy('date', 'asc'));
+        const balancesSnapshot = await getDocs(balancesQuery);
+        balancesSnapshot.docs.forEach(doc => {
+            allTransactions.push({ id: doc.id, ...doc.data(), type: 'balance' });
+        });
+
+        // Create a copy of the edited transaction with updated values
+        const editedTransaction = allTransactions.find(t => t.id === editedTransactionId);
+        if (!editedTransaction) return;
+
+        // Update the edited transaction in the array with new values
+        const updatedEditedTransaction = {
+            ...editedTransaction,
+            amount: editedTransactionAmount,
+            date: editedTransactionDate,
+            type: editedTransactionType
+        };
+
+        // Replace the old transaction with the updated one
+        const editedIndex = allTransactions.findIndex(t => t.id === editedTransactionId);
+        allTransactions[editedIndex] = updatedEditedTransaction;
+
+        // Sort all transactions by date and time again (in case date changed)
+        allTransactions.sort((a, b) => {
+            const dateA = new Date(a.date).getTime();
+            const dateB = new Date(b.date).getTime();
+            if (dateA === dateB) {
+                // If same date, sort by creation time or ID for consistency
+                return a.id.localeCompare(b.id);
+            }
+            return dateA - dateB;
+        });
+
+        // Find the new position of the edited transaction
+        const newEditedIndex = allTransactions.findIndex(t => t.id === editedTransactionId);
+        if (newEditedIndex === -1) return;
+
+        // Recalculate ALL running balances from the beginning
+        let runningBalance = 0;
+        const batch = writeBatch(db);
+
+        console.log(`Recalculating running balances for ${allTransactions.length} transactions`);
+
+        for (let i = 0; i < allTransactions.length; i++) {
+            const transaction = allTransactions[i];
+            const oldRunningBalance = transaction.runningBalance;
+
+            // Calculate running balance based on transaction type
+            if (transaction.type === 'expense') {
+                runningBalance -= transaction.amount;
+            } else if (transaction.type === 'income') {
+                runningBalance += transaction.amount;
+            } else if (transaction.type === 'balance') {
+                const isPositive = transaction.description.includes('+');
+                runningBalance += isPositive ? transaction.amount : -transaction.amount;
+            }
+
+            // Update the running balance in the transaction object
+            transaction.runningBalance = runningBalance;
+
+            // Add to batch for database update
+            const collectionName = transaction.type === 'expense' ? 'expenses' :
+                transaction.type === 'income' ? 'incomes' : 'balances';
+            const docRef = doc(db, 'artifacts', appId, 'users', userId, collectionName, transaction.id);
+            batch.update(docRef, { runningBalance });
+
+            // Log changes for debugging
+            if (oldRunningBalance !== runningBalance) {
+                console.log(`Transaction ${transaction.id} (${transaction.type}): ${oldRunningBalance} -> ${runningBalance}`);
+            }
+        }
+
+        // Commit all updates
+        await batch.commit();
+
+        console.log('Successfully recalculated running balances for all transactions');
+
+    } catch (error) {
+        console.error("Error recalculating running balances:", error);
+        throw error;
+    }
+};
 
 // Export Firebase instances
 export { app, appId, auth, db };

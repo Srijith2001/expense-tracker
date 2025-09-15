@@ -1,6 +1,7 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Bar, Pie } from "react-chartjs-2";
 import type { Expense, Income } from "../../config/types";
+import { getCurrentISTDateOnly, getCurrentISTMonth } from "../../utils/dateUtils";
 import { exportCategorySpendingToCSV, getCategoryColor } from "../../utils/helper";
 import CustomDropdown from "../CustomDropdown/CustomDropdown";
 import CustomMonthSelector from "../CustomMonthSelector/CustomMonthSelector";
@@ -31,6 +32,19 @@ const Charts: React.FC<ChartsProps> = ({
 }) => {
     const [timeframe, setTimeframe] = useState<string>("5"); // Default to 5 months
     const [trendMode, setTrendMode] = useState<'monthly' | 'salary-cycle'>('monthly');
+    const [chartKey, setChartKey] = useState(0);
+    const pieChartRef = useRef<any>(null);
+    const barChartRef = useRef<any>(null);
+
+    // Handle window resize to force chart redraw
+    useEffect(() => {
+        const handleResize = () => {
+            setChartKey(prev => prev + 1);
+        };
+
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     const timeframeOptions = [
         { value: "3", label: "Last 3 months" },
@@ -40,7 +54,7 @@ const Charts: React.FC<ChartsProps> = ({
     ];
 
     const handleDownloadCategorySpending = () => {
-        const filename = `category-spending-${new Date().toISOString().slice(0, 7)}.csv`;
+        const filename = `category-spending-${getCurrentISTMonth()}.csv`;
         exportCategorySpendingToCSV(expenses, filename);
     };
 
@@ -98,7 +112,7 @@ const Charts: React.FC<ChartsProps> = ({
                     const nextSalary = sortedSalary[i + 1];
 
                     const cycleStart = currentSalary.date.split('T')[0];
-                    const cycleEnd = nextSalary ? nextSalary.date.split('T')[0] : new Date().toISOString().split('T')[0];
+                    const cycleEnd = nextSalary ? nextSalary.date.split('T')[0] : getCurrentISTDateOnly();
 
                     // Format the label
                     const startDate = new Date(cycleStart);
@@ -181,9 +195,9 @@ const Charts: React.FC<ChartsProps> = ({
     return (
         <div className="charts-grid">
             <div className="card">
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                    <h3 className="card-title" style={{ marginBottom: 0 }}>Category-wise Spend</h3>
-                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                <div className="chart-header">
+                    <h3 className="chart-title">Category-wise Spend</h3>
+                    <div className="chart-header-controls">
                         <CustomMonthSelector
                             value={monthFilter}
                             onChange={onMonthFilterChange}
@@ -205,13 +219,13 @@ const Charts: React.FC<ChartsProps> = ({
                     </div>
                 </div>
                 <div className="chart-container">
-                    {categoryChartData.labels.length > 0 ? <Pie data={categoryChartData} options={{ responsive: true, maintainAspectRatio: false }} /> : <p style={{ textAlign: 'center', paddingTop: '6rem' }}>No expense data for this month.</p>}
+                    {categoryChartData.labels.length > 0 ? <Pie key={`pie-${chartKey}`} data={categoryChartData} options={{ responsive: true, maintainAspectRatio: false }} /> : <p style={{ textAlign: 'center', paddingTop: '6rem' }}>No expense data for this month.</p>}
                 </div>
             </div>
             <div className="card">
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                    <h3 className="card-title" style={{ marginBottom: 0 }}>Income vs Expense Trend</h3>
-                    <div style={{ width: '200px' }}>
+                <div className="chart-header">
+                    <h3 className="chart-title">Income vs Expense Trend</h3>
+                    <div className="chart-header-controls" style={{ width: '200px' }}>
                         <CustomDropdown
                             options={timeframeOptions}
                             value={timeframe}
@@ -221,7 +235,7 @@ const Charts: React.FC<ChartsProps> = ({
                     </div>
                 </div>
                 <div className="chart-container">
-                    <Bar data={incomeExpenseTrendData} options={{ responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, title: { display: true, text: 'Amount' } } } }} />
+                    <Bar key={`bar-${chartKey}`} data={incomeExpenseTrendData} options={{ responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, title: { display: true, text: 'Amount' } } } }} />
                 </div>
             </div>
         </div>

@@ -1,5 +1,6 @@
 // --- Helper Functions ---
 import type { AnyTransaction, Expense } from '../config/types';
+import { formatDateToIST } from './dateUtils';
 
 const getCategoryColor = (category: string): string => ({
     'Food': '#34D399', 'Grocery': '#60A5FA', 'Rent': '#F97316', 'Utilities': '#FBBF24',
@@ -32,7 +33,7 @@ const exportToCSV = (transactions: AnyTransaction[], filename: string = 'transac
             const runningBalance = transaction.runningBalance.toFixed(2);
 
             return [
-                new Date(transaction.date).toLocaleDateString('en-IN', { timeZone: 'UTC' }),
+                formatDateToIST(transaction.date),
                 type,
                 `"${transaction.description.replace(/"/g, '""')}"`, // Escape quotes in description
                 category,

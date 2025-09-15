@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { deleteUserAccount, getUserProfile, setupAuth, signInWithGoogle, signOutUser } from '../config/firebase';
+import { useToast } from '../contexts/ToastContext';
 
 interface UserProfile {
     name: string;
@@ -12,6 +13,7 @@ export const useAuth = () => {
     const [profile, setProfile] = useState<UserProfile | null>(null);
     const [showProfileModal, setShowProfileModal] = useState(false);
     const [loading, setLoading] = useState<boolean>(true);
+    const { showSuccess, showError } = useToast();
 
     useEffect(() => {
         const unsubscribe = setupAuth(setUserId);
@@ -45,8 +47,10 @@ export const useAuth = () => {
         setIsSigningIn(true);
         try {
             await signInWithGoogle();
+            showSuccess('Successfully signed in!');
         } catch (error) {
             console.error('Sign in failed:', error);
+            showError('Failed to sign in. Please try again.');
         } finally {
             setIsSigningIn(false);
         }
@@ -55,8 +59,10 @@ export const useAuth = () => {
     const handleSignOut = async () => {
         try {
             await signOutUser();
+            showSuccess('Successfully signed out!');
         } catch (error) {
             console.error('Sign out failed:', error);
+            showError('Failed to sign out. Please try again.');
         }
     };
 
@@ -65,11 +71,11 @@ export const useAuth = () => {
             try {
                 if (userId) {
                     await deleteUserAccount(userId);
-                    alert("Account deleted successfully");
+                    showSuccess("Account deleted successfully");
                 }
             } catch (err) {
                 console.error(err);
-                alert("Failed to delete account: " + (err as Error).message);
+                showError("Failed to delete account: " + (err as Error).message);
             }
         }
     };
